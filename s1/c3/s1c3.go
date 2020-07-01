@@ -19,5 +19,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Key: %q.\n\nPlaintext: %s\n", key, rawPlaintext)
+	fmt.Printf("Key: %q.\n\nPlaintext: %q\n", key, rawPlaintext)
 }

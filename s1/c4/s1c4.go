@@ -20,5 +20,5 @@ func main() {
 	}
 
 	rawPlaintext, err := hex.DecodeString(plaintext)
-	fmt.Printf("Ciphertext:\n%s\n\nKey: %q\n\nPlaintext:\n%s\n", ciphertext, key, rawPlaintext)
+	fmt.Printf("Ciphertext:\n%q\n\nKey: %q\n\nPlaintext:\n%q\n", ciphertext, key, rawPlaintext)
 }

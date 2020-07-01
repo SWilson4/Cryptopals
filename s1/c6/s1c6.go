@@ -26,5 +26,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Key: %q\n\nPlaintext:\n%s\n", rawKey, rawPlaintext)
+	fmt.Printf("Key: %q\n\nPlaintext:\n%q\n", rawKey, rawPlaintext)
 }

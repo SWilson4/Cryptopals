@@ -21,6 +21,9 @@ func main() {
 	}
 
 	rawPlaintext, err := base64.StdEncoding.DecodeString(plaintext)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Println(string(rawPlaintext))
+	fmt.Printf("%q\n", rawPlaintext)
 }
