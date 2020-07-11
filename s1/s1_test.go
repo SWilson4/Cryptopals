@@ -73,3 +73,37 @@ func TestCountRepeats(t *testing.T) {
 		t.Errorf("countRepeats(%v, %d) == %d, want %d", inBytes, inSize, got, want)
 	}
 }
+
+/*
+func TestS1C1(t *testing.T) {
+	if err := os.Chdir("c1"); err != nil {
+		t.Errorf("s1c1: %v", err)
+	}
+
+	exp, err := os.Open("s1c1.out")
+	if err != nil {
+		t.Errorf("s1c1: %v", err)
+	}
+	defer exp.Close()
+
+	tmp, err := ioutil.TempFile("", "output")
+	if err != nil {
+		t.Errorf("s1c1: %v", err)
+	}
+	defer os.Remove(tmp.Name())
+
+	cmd := exec.Command("go run", "s1c1.go")
+	stdout, err = cmd.StdoutPipe()
+	if err != nil {
+		t.Errorf("s1c1: %v", err)
+	}
+
+	w := bufio.NewWriter(tmp)
+	defer w.Flush()
+
+	cmd := exec.Command("diff", tmp.Name(), exp.Name())
+	if err != cmd.Run(); err != nil {
+		t.Errorf("s1c1: %v", err)
+	}
+}
+*/

@@ -15,10 +15,10 @@ import (
 )
 
 // Exported functions take and return only hex- or base64-encoded strings/files. Output encoding is the same as input
-// encoding; for example, functions which operate on hex-encrypted data will return hex-encrypted data. In functions
-// that operate on strings, the variable names "plaintext" and "ciphertext" will refer to strings. In functions that
-// operate on bytes, they will refer to byte slices. The name "key" is similar; however, when a key is only one byte
-// long, it will be handled as a byte regardless of other function parameter and return types.
+// encoding; for example, functions which operate on hex-encoded data will return hex-encoded data. In functions that
+// operate on strings, the variable names "plaintext" and "ciphertext" will refer to strings. In functions that operate
+// on bytes, they will refer to byte slices. The name "key" is similar; however, when a key is only one byte long, it
+// will be handled as a byte regardless of other function parameter and return types.
 
 // Returns the base64 encoding of a given hex-encoded string.
 func HexToBase64(hexString string) (string, error) {
@@ -30,7 +30,7 @@ func HexToBase64(hexString string) (string, error) {
 }
 
 // Returns the XOR of two byte slices of the same length.
-func fixedXOR(rawBytes1, rawBytes2 []byte) ([]byte, error) {
+func RawFixedXOR(rawBytes1, rawBytes2 []byte) ([]byte, error) {
 	if len(rawBytes1) != len(rawBytes2) {
 		return nil, errors.New("Inputs are of different lengths")
 	}
@@ -55,7 +55,7 @@ func FixedXOR(hexString1, hexString2 string) (string, error) {
 		return "", err
 	}
 
-	rawBytes3, err := fixedXOR(rawBytes1, rawBytes2)
+	rawBytes3, err := RawFixedXOR(rawBytes1, rawBytes2)
 	if err != nil {
 		return "", err
 	}
@@ -228,7 +228,7 @@ func findKeySize(plaintext []byte) (int, error) {
 	return keySize, nil
 }
 
-func base64FileToBytes(file *os.File) ([]byte, error) {
+func Base64FileToBytes(file *os.File) ([]byte, error) {
 	base64Text, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func base64FileToBytes(file *os.File) ([]byte, error) {
 // Returns a base64-encoded guess of the (key, plaintext) pair corresponding to a base64-encoded file, assuming that the
 // file has been XORed against a repeating key.
 func BreakRepeatingKeyXOR(file *os.File) (key, plaintext string, err error) {
-	rawCiphertext, err := base64FileToBytes(file)
+	rawCiphertext, err := Base64FileToBytes(file)
 	if err != nil {
 		return
 	}
@@ -275,7 +275,7 @@ func BreakRepeatingKeyXOR(file *os.File) (key, plaintext string, err error) {
 	return
 }
 
-// Decrypts a given ciphertext using a given AES key in ECB mode.
+// Decrypts a given ciphertext using a given AES-128 key in ECB mode.
 func aesECB(ciphertext, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -291,7 +291,7 @@ func aesECB(ciphertext, key []byte) ([]byte, error) {
 
 // Decrypts a base64-encoded file with AES-128 in ECB mode and returns the result as a base64-encoded string.
 func AESECB(file *os.File, key string) (string, error) {
-	rawCiphertext, err := base64FileToBytes(file)
+	rawCiphertext, err := Base64FileToBytes(file)
 	if err != nil {
 		return "", err
 	}

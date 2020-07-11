@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	file, err := os.Open("s1c6.in")
+	file, err := os.Open("s1c06.in")
 	if err != nil {
 		log.Fatal(err)
 	}

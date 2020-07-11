@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cryptopals/s1"
+	"cryptopals/s2"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	file, err := os.Open("s1c7.in")
+	file, err := os.Open("s2c10.in")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	key := base64.StdEncoding.EncodeToString([]byte("YELLOW SUBMARINE"))
-	plaintext, err := s1.AESECB(file, key)
+	// base64 encoding of 16 bytes of zeros
+	iv := "AAAAAAAAAAAAAAAAAAAAAA=="
+	plaintext, err := s2.AESCBC(file, key, iv)
 	if err != nil {
 		log.Fatal(err)
 	}
