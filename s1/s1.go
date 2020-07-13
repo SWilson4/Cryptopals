@@ -310,7 +310,7 @@ func AESECB(file *os.File, key string) (string, error) {
 }
 
 // Counts the number of repeated substrings (counting all occurrences) of length size in rawBytes
-func countRepeats(rawBytes []byte, size int) int {
+func CountRepeats(rawBytes []byte, size int) int {
 	count := 0
 	sa := suffixarray.New(rawBytes)
 	m := make(map[int]bool)
@@ -339,7 +339,7 @@ func DetectAESECB(file *os.File) (string, error) {
 			return "", err
 		}
 
-		score := countRepeats(rawLine, 16)
+		score := CountRepeats(rawLine, 16)
 		if score >= maxScore {
 			maxScore = score
 			ciphertext = line

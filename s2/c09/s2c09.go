@@ -9,8 +9,7 @@ import (
 
 func main() {
 	input := hex.EncodeToString([]byte("YELLOW SUBMARINE"))
-	blockSize := 20
-	padded, err := s2.PKCSPadding(input, blockSize)
+	padded, err := s2.PKCSPadding(input, 20)
 	if err != nil {
 		log.Fatal(err)
 	}
