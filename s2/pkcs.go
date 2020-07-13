@@ -1,12 +1,8 @@
 package s2
 
-import (
-	"encoding/hex"
-)
-
 type pkcs struct{ blockSize uint8 }
 
-func newPKCS(blockSize uint8) Padder {
+func newPKCS(blockSize uint8) padder {
 	return &pkcs{blockSize}
 }
 
@@ -38,16 +34,4 @@ func (p *pkcs) unpad(rawBytes []byte) []byte {
 	}
 
 	return rawBytes[:len(rawBytes)-toRemove]
-}
-
-// Returns hexString padded according to PKCS with a given block size.
-func PKCSPadding(hexString string, blockSize uint8) (string, error) {
-	rawBytes, err := hex.DecodeString(hexString)
-	if err != nil {
-		return "", err
-	}
-
-	p := newPKCS(blockSize)
-	rawPadded := p.pad(rawBytes)
-	return hex.EncodeToString(rawPadded), nil
 }

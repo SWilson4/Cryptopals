@@ -1,6 +1,6 @@
 package s2
 
-type Padder interface {
+type padder interface {
 	pad([]byte) []byte
 	unpad([]byte) []byte
 }
