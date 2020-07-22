@@ -15,6 +15,7 @@ The structure of this repo mimics the structure of the challenges website: each 
     7. [AES in ECB mode](https://github.com/SWilson4/cryptopals/blob/master/challenges/s1/c07/c07.go)
     8. [Detect AES in ECB mode](https://github.com/SWilson4/cryptopals/blob/master/challenges/s1/c08/c08.go)
 2. [Block crypto](https://github.com/SWilson4/cryptopals/tree/master/challenges/s2)
+
     9. [Implement PKCS#7 padding](https://github.com/SWilson4/cryptopals/blob/master/challenges/s2/c09/c09.go)
     10. [Implement CBC mode](https://github.com/SWilson4/cryptopals/blob/master/challenges/s2/c10/c10.go)
     11. [An ECB/CBC detection oracle](https://github.com/SWilson4/cryptopals/blob/master/challenges/s2/c11/c11.go)
