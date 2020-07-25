@@ -1,6 +1,9 @@
 package block
 
-import "crypto/cipher"
+import (
+	"crypto/aes"
+	"crypto/cipher"
+)
 
 // This file provides an implementation of the ECB block cipher mode. The organization is similar to that of Go's
 // crypto/cipher package for compatibility with Go's AES code, but the implementation is done "from scratch", in the
@@ -63,4 +66,18 @@ func (m *ecbDecrypter) CryptBlocks(dst, src []byte) {
 	for i := 0; i < len(src); i += m.blockSize {
 		m.b.Decrypt(dst[i:i+m.blockSize], src[i:i+m.blockSize])
 	}
+}
+
+// Decrypts a given ciphertext using a given AES-128 key in ECB mode.
+func aesECB(ciphertext, key []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	decrypter := newECBDecrypter(block)
+	plaintext := make([]byte, len(ciphertext))
+	decrypter.CryptBlocks(plaintext, ciphertext)
+
+	return plaintext, nil
 }

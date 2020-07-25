@@ -1,5 +1,7 @@
 package block
 
+import "encoding/hex"
+
 type padder interface {
 	pad([]byte) []byte
 	unpad([]byte) []byte
@@ -39,4 +41,16 @@ func (p *pkcs) unpad(rawBytes []byte) []byte {
 	}
 
 	return rawBytes[:len(rawBytes)-toRemove]
+}
+
+// Returns hexString padded according to PKCS with a given block size.
+func PKCSPadding(hexString string, blockSize uint8) (string, error) {
+	rawBytes, err := hex.DecodeString(hexString)
+	if err != nil {
+		return "", err
+	}
+
+	p := newPKCS(blockSize)
+	rawPadded := p.pad(rawBytes)
+	return hex.EncodeToString(rawPadded), nil
 }

@@ -1,7 +1,10 @@
 package block
 
 import (
+	"crypto/aes"
 	"crypto/cipher"
+	"encoding/base64"
+	"os"
 )
 
 // This file provides an implementation of the CBC block cipher mode. The organization is similar to that of Go's
@@ -91,4 +94,63 @@ func (m *cbcDecrypter) CryptBlocks(dst, src []byte) {
 		copy(dst[i:i+m.blockSize], plaintextBlock)
 		salt = src[i : i+m.blockSize]
 	}
+}
+
+// Decrypts a given ciphertext using a given AES-128 key and IV in CBC mode.
+func aesCBC(ciphertext, key, iv []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	decrypter := newCBCDecrypter(block, iv)
+	plaintext := make([]byte, len(ciphertext))
+	decrypter.CryptBlocks(plaintext, ciphertext)
+
+	return plaintext, nil
+}
+
+// Decrypts a base64-encoded file with AES-128 in ECB mode and returns the result as a base64-encoded string.
+func AESECB(file *os.File, key string) (string, error) {
+	rawCiphertext, err := base64FileToBytes(file)
+	if err != nil {
+		return "", err
+	}
+
+	rawKey, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return "", err
+	}
+
+	rawPlaintext, err := aesECB(rawCiphertext, rawKey)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(rawPlaintext), nil
+}
+
+// Decrypts a base64-encoded file with  AES-128 in CBC mode and returns the result as a base64-encoded string.
+func AESCBC(file *os.File, key, iv string) (string, error) {
+	rawCiphertext, err := base64FileToBytes(file)
+	if err != nil {
+		return "", err
+	}
+
+	rawKey, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return "", err
+	}
+
+	rawIV, err := base64.StdEncoding.DecodeString(iv)
+	if err != nil {
+		return "", err
+	}
+
+	rawPlaintext, err := aesCBC(rawCiphertext, rawKey, rawIV)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(rawPlaintext), nil
 }
