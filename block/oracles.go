@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/base64"
 	"math/big"
 )
 
@@ -21,42 +22,74 @@ func randInt(lo, hi int) int {
 	return int(bigRand.Int64()) + lo
 }
 
-// Fills dst with random bytes using crypto.rand.
-func randBytes(dst []byte) {
-	_, err := rand.Read(dst)
+// Returns n random bytes.
+func randBytes(n int) []byte {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
 	if err != nil {
 		panic(err)
 	}
+	return b
 }
 
-// Encrypts a randomly salted plaintext with a random AES key in either ECB or
-// CBC mode. Returns true iff ECB mode is used.
-func encryptionOracle(rawPlaintext []byte) ([]byte, bool) {
-	pre, post := randInt(5, 11), randInt(5, 11)
-	prefix, postfix := make([]byte, pre), make([]byte, post)
-	randBytes(prefix)
-	randBytes(postfix)
-	saltedPlaintext := append(prefix, rawPlaintext...)
-	saltedPlaintext = append(saltedPlaintext, postfix...)
-	p := newPKCS(16)
-	paddedPlaintext := p.pad(saltedPlaintext)
-	key := make([]byte, 16)
-	randBytes(key)
-	var encrypter cipher.BlockMode
-	block, err := aes.NewCipher(key)
+// Returns an oracle which randomly salts, then encrypts, a plaintext with a random AES key (different each time) in
+// either ECB or CBC mode. Also returns true iff ECB mode is used.
+func GetAESECBCBCEncryptionOracle() (func([]byte) []byte, bool) {
+	ecb := randInt(0, 2)
+	return func(plaintext []byte) []byte {
+		pre, post := randInt(5, 11), randInt(5, 11)
+		prefix, postfix := randBytes(pre), randBytes(post)
+		saltedPlaintext := append(prefix, plaintext...)
+		saltedPlaintext = append(saltedPlaintext, postfix...)
+		p := newPKCS(16)
+		paddedPlaintext := p.pad(saltedPlaintext)
+		key := randBytes(16)
+		block, err := aes.NewCipher(key)
+		if err != nil {
+			panic(err)
+		}
+
+		var encrypter cipher.BlockMode
+		if ecb == 0 {
+			encrypter = newECBEncrypter(block)
+		} else {
+			iv := randBytes(16)
+			encrypter = newCBCEncrypter(block, iv)
+		}
+		ciphertext := make([]byte, len(paddedPlaintext))
+		encrypter.CryptBlocks(ciphertext, paddedPlaintext)
+		return ciphertext
+	}, ecb == 0
+}
+
+// Returns true iff the oracle is using ECB mode.
+func ECBCBCDetectionOracle(oracle func([]byte) []byte) bool {
+	plaintext := []byte("YELLOW SUBMARINEYELLOW SUBMARINEYELLOW SUBMARINE")
+	ciphertext := oracle(plaintext)
+	return countRepeats(ciphertext, 16) > 0
+}
+
+// Returns an AES-128-ECB encryption oracle that appends a given base64-encoded salt to a plaintext and encrypts with a
+// fixed random key.
+func GetAESECBEncryptionOracle(salt string) func([]byte) []byte {
+	rawSalt, err := base64.StdEncoding.DecodeString(salt)
 	if err != nil {
 		panic(err)
 	}
 
-	ecb := randInt(0, 2)
-	if ecb == 0 {
-		encrypter = newECBEncrypter(block)
-	} else {
-		iv := make([]byte, 16)
-		randBytes(iv)
-		encrypter = newCBCEncrypter(block, iv)
+	key := randBytes(16)
+	return func(plaintext []byte) []byte {
+		saltedPlaintext := append(plaintext, rawSalt...)
+		p := newPKCS(16)
+		paddedPlaintext := p.pad(saltedPlaintext)
+		block, err := aes.NewCipher(key)
+		if err != nil {
+			panic(err)
+		}
+
+		encrypter := newECBEncrypter(block)
+		ciphertext := make([]byte, len(paddedPlaintext))
+		encrypter.CryptBlocks(ciphertext, paddedPlaintext)
+		return ciphertext
 	}
-	ciphertext := make([]byte, len(paddedPlaintext))
-	encrypter.CryptBlocks(ciphertext, paddedPlaintext)
-	return ciphertext, ecb == 0
 }
